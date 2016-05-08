@@ -79,6 +79,7 @@ public class TwitterSearch {
             JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
             //TODO add parsing of json
             System.out.println(obj);
+            System.out.println("");
             /*if (obj != null) {
                 String tweet = ((JSONObject)obj.get(0)).get("text").toString();
                 ret = (tweet != null) ? tweet : "";
