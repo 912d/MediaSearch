@@ -15,8 +15,6 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONObject;
@@ -27,12 +25,13 @@ import org.json.simple.JSONValue;
  * @author jackmusial
  */
 public final class TwitterService {
-    private static final String CONSUMER_KEY = "EgzK0RfsxfSiOIuaocz1dWl2i";
-    private static final String CONSUMER_SECRET = "mv2MSuA2AsQXzLoyyJCSm2e1WUlKcgw5VIHkkhI6xTrbxV2t7t";
-    private static final String END_POINT_URL = "https://api.twitter.com/oauth2/token";
-    private static final String ACCESS_TOKEN = "725253533071712256-l1F54xJlqmtlCfzZ9gN7Mgd09C5YFgg";
-    private static final String ACCESS_TOKEN_SECRET = "Kw7qX4XmXtXdtujBmWD8wA54myr9d8vBPUihRxBDn3bWX";
-    private final String BEARER_TOKEN;
+    protected static final String CONSUMER_KEY = "EgzK0RfsxfSiOIuaocz1dWl2i";
+    protected static final String CONSUMER_SECRET = "mv2MSuA2AsQXzLoyyJCSm2e1WUlKcgw5VIHkkhI6xTrbxV2t7t";
+    protected static final String ACCESS_TOKEN = "725253533071712256-l1F54xJlqmtlCfzZ9gN7Mgd09C5YFgg";
+    protected static final String ACCESS_TOKEN_SECRET = "Kw7qX4XmXtXdtujBmWD8wA54myr9d8vBPUihRxBDn3bWX";
+    private static final String OAUTH_TOKEN_URL = "https://api.twitter.com/oauth2/token";
+    private static final String RATE_LIMIT_STATUS_URL = "https://api.twitter.com/1.1/application/rate_limit_status.json?resources=search";
+    protected final String BEARER_TOKEN;
     
     public TwitterService() {
         BEARER_TOKEN = requestBearerToken(); 
@@ -52,21 +51,21 @@ public final class TwitterService {
 	}
     }
     
-    private static HttpsURLConnection setUpConnection() {
+    private static HttpsURLConnection setUpConnection(String requestMethod, String endPointUrl, 
+            String authorization, String authValue) {
         HttpsURLConnection connection = null;
-        String encodedCredentials = encodeKeys();
         URL url; 
         try {
-            url = new URL(END_POINT_URL);
+            url = new URL(endPointUrl);
             connection = (HttpsURLConnection) url.openConnection();
             connection.setDoOutput(true);
             connection.setDoInput(true); 
-            connection.setRequestMethod("POST"); 
+            connection.setRequestMethod(requestMethod);
             connection.setRequestProperty("Host", "api.twitter.com");
             connection.setRequestProperty("User-Agent", "NewSeedCloud");
-            connection.setRequestProperty("Authorization", "Basic " + encodedCredentials);
+            connection.setRequestProperty("Authorization", authorization + authValue);
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"); 
-            connection.setRequestProperty("Content-Length", "29");
+            //connection.setRequestProperty("Content-Length", "29");
             connection.setUseCaches(false);
             writeRequest(connection, "grant_type=client_credentials");
         } catch (MalformedURLException | ProtocolException ex) {
@@ -78,22 +77,29 @@ public final class TwitterService {
     }
     
     // Constructs the request for requesting a bearer token and returns that token as a string
-    public String requestBearerToken() {
+    private static String requestBearerToken() {
         String ret = "";
-        HttpsURLConnection connection = setUpConnection();
+        HttpsURLConnection connection = setUpConnection("POST", OAUTH_TOKEN_URL, "Basic ", encodeKeys());
         JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
-        
-        if (obj != null && connection != null) {
+        if (obj != null) {
             String tokenType = (String)obj.get("token_type");
             String token = (String)obj.get("access_token");
             ret = ((tokenType.equals("bearer")) && (token != null)) ? token : "";
+        }
+        if (connection != null) {
             connection.disconnect();
         }
         return ret;
     }
     
-    /*private static boolean getRateLimitStatus() {
-    }*/
+    private String getRateLimitStatus() {
+        HttpsURLConnection connection = setUpConnection("GET",
+                RATE_LIMIT_STATUS_URL, "Bearer ", BEARER_TOKEN);
+        String ret = null;
+        //json parsing
+        
+        return ret;
+    }
     
     // Writes a request to a connection
     private static boolean writeRequest(HttpsURLConnection connection, String textBody) {
@@ -118,11 +124,4 @@ public final class TwitterService {
 	}
 	catch (IOException e) { return new String(); }
     }
-    
-    public String getACCESS_TOKEN_SECRET() { return ACCESS_TOKEN_SECRET; }
-    public String getCONSUMER_KEY() { return CONSUMER_KEY; }
-    public String getCONSUMER_SECRET() { return CONSUMER_SECRET; }
-    public String getACCESS_TOKEN() { return ACCESS_TOKEN; }
-    public String getEND_POINT_URL() { return END_POINT_URL; }   
-    public String getBEARER_TOKEN() { return BEARER_TOKEN; }
 }
