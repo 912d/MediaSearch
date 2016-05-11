@@ -12,8 +12,10 @@ package mediasearch.twitter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import javax.net.ssl.HttpsURLConnection;
 import org.json.simple.JSONObject;
@@ -32,36 +34,30 @@ public class TwitterSearch {
     private static int counter;
     private final SEARCHTYPE searchtype;
     private final String bearerToken;
-    private ConfigurationBuilder configurationBuilder;
-    private String query;
-    private TwitterService twitterService;
+    private final ConfigurationBuilder configurationBuilder;
+    private final String query;
+    private final TwitterService twitterService;
+    private final String endPointUrl;
 
-    /**
-     * default constructor
-     */
-    public TwitterSearch() {
-        this("Obama", SEARCHTYPE.TEXT);
-    }
-    
     /**
      * @param query our query to search twitter
      * @param searchtype indicate where we are looking for our query
+     * @throws java.io.UnsupportedEncodingException
      */
-    public TwitterSearch(String query, SEARCHTYPE searchtype) {
+    public TwitterSearch(String query, SEARCHTYPE searchtype) throws UnsupportedEncodingException {
         this.query = query;
         this.searchtype = searchtype;
         database = new HashMap<>();
+        endPointUrl = "https://api.twitter.com/1.1/search/tweets.json?q=" + 
+                URLEncoder.encode(query, "UTF-8");
         twitterService = new TwitterService();
-        bearerToken = twitterService.getBEARER_TOKEN();
+        bearerToken = twitterService.BEARER_TOKEN;
+        configurationBuilder = new ConfigurationBuilder();
         System.out.println(bearerToken);
     }    
 
     // Fetches the first tweet from a given user's timeline
     public String search() throws IOException {
-        //ADD url obfuscation etc
-        String endPointUrl ="https://api.twitter.com/1.1/search/tweets.json?q=%23" + getQuery();
-                //"https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=twiterapi&count=2";
-                
 	HttpsURLConnection connection = null;
         String ret = "";
 	try {
@@ -79,7 +75,6 @@ public class TwitterSearch {
             JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
             //TODO add parsing of json
             System.out.println(obj);
-            System.out.println("");
             /*if (obj != null) {
                 String tweet = ((JSONObject)obj.get(0)).get("text").toString();
                 ret = (tweet != null) ? tweet : "";
@@ -108,49 +103,15 @@ public class TwitterSearch {
 	catch (IOException e) { return new String(); }
     }
     
-    /*public boolean Search() throws TwitterException {
-        setup();
-        TwitterFactory tf = new TwitterFactory(configurationBuilder.build());
-        Twitter twitter = tf.getInstance();
-        try {
-            Query queries = new Query(getQuery());
-            QueryResult result;
-            do {
-                result = twitter.search(queries);
-                List<Status> tweets = result.getTweets();
-                tweets.stream().forEach((tweet) -> {
-                    switch (searchtype) {
-                        case HASHTAG:
-                        case TEXT:
-                            String t = tweet.getText();
-                            database.put(tweet.getUser().getScreenName(),
-                                    tweet.getText());
-                            break;
-                        case USERNAME:
-                            t = tweet.getUser().getScreenName();
-                            database.put(tweet.getUser().getScreenName(),
-                                    tweet.getText());
-                    }
-                });
-            } while ((queries = result.nextQuery()) != null);
-        } catch (TwitterException te) {
-            System.out.println("Failed to search tweets: " + te.getMessage());
-            return false;
-        }
-        return true;
-    } */
-    
     /**
      * setup twitter configuration builder
      */
     public void setup() { 
-        configurationBuilder = new ConfigurationBuilder();
-        ConfigurationBuilder setOAuthAccessTokenSecret;
-        setOAuthAccessTokenSecret = configurationBuilder.setDebugEnabled(true)
-                .setOAuthConsumerKey(twitterService.getCONSUMER_KEY())
-                .setOAuthConsumerSecret(twitterService.getCONSUMER_SECRET())
-                .setOAuthAccessToken(twitterService.getACCESS_TOKEN())
-                .setOAuthAccessTokenSecret(twitterService.getACCESS_TOKEN_SECRET());
+        configurationBuilder.setDebugEnabled(true)
+                .setOAuthConsumerKey(TwitterService.CONSUMER_KEY)
+                .setOAuthConsumerSecret(TwitterService.CONSUMER_SECRET)
+                .setOAuthAccessToken(TwitterService.ACCESS_TOKEN)
+                .setOAuthAccessTokenSecret(TwitterService.ACCESS_TOKEN_SECRET);
     }
     
     public int getCounter() { return counter; }
