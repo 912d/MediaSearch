@@ -13,8 +13,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import javax.net.ssl.HttpsURLConnection;
@@ -51,42 +49,27 @@ public class TwitterSearch {
         endPointUrl = "https://api.twitter.com/1.1/search/tweets.json?q=" + 
                 URLEncoder.encode(query, "UTF-8");
         twitterService = new TwitterService();
-        bearerToken = twitterService.BEARER_TOKEN;
+        bearerToken = TwitterService.getBEARER_TOKEN();
         configurationBuilder = new ConfigurationBuilder();
         System.out.println(bearerToken);
     }    
 
     // Fetches the first tweet from a given user's timeline
     public String search() throws IOException {
-	HttpsURLConnection connection = null;
+        HttpsURLConnection connection = twitterService.setUpConnection("GET", 
+                endPointUrl, "Bearer ", bearerToken);
         String ret = "";
-	try {
-            URL url = new URL(endPointUrl); 
-            connection = (HttpsURLConnection) url.openConnection();           
-            connection.setDoOutput(true);
-            connection.setDoInput(true); 
-            connection.setRequestMethod("GET"); 
-            connection.setRequestProperty("Host", "api.twitter.com");
-            connection.setRequestProperty("User-Agent", "NewSeedCloud");
-            connection.setRequestProperty("Authorization", "Bearer " + getBearerToken());
-            connection.setUseCaches(false);
-
-            // Parse the JSON response into a JSON mapped object to fetch fields from.
-            JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
-            //TODO add parsing of json
-            System.out.println(obj);
-            /*if (obj != null) {
-                String tweet = ((JSONObject)obj.get(0)).get("text").toString();
-                ret = (tweet != null) ? tweet : "";
-            }*/
-	}
-	catch (MalformedURLException e) {
-            throw new IOException("Invalid endpoint URL specified.", e);
-        }finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-	}
+        // Parse the JSON response into a JSON mapped object to fetch fields from.
+        JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
+        //TODO add parsing of json
+        System.out.println(obj);
+        /*if (obj != null) {
+            String tweet = ((JSONObject)obj.get(0)).get("text").toString();
+            ret = (tweet != null) ? tweet : "";
+        }*/
+        if (connection != null) {
+            connection.disconnect();
+        }
         return ret;
     }
     
@@ -117,6 +100,4 @@ public class TwitterSearch {
     public int getCounter() { return counter; }
     public HashMap<String, String> getDatabase() { return database; }
     public SEARCHTYPE getSearchtype() { return searchtype; }
-    public String getBearerToken() { return bearerToken; }
-    public String getQuery() { return this.query; }   
 }
