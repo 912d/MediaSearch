@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -33,11 +34,9 @@ public class TwitterParser {
 
     public TwitterParser() {
         bearerToken = requestBearerToken(); 
-        
     }
     
-    public static class Tweets {
-        /* array of tweets */
+    public static class TweetsList {
         @Key("statuses") 
         private List<Tweet> tweetsList;
 
@@ -46,7 +45,46 @@ public class TwitterParser {
         }
     }
     
-    public static class 
+    public static class Tweet extends GenericJson {
+        @Key("created_at")
+        private String createdAt;
+
+        public String getCreatedAt() {
+            return createdAt;
+        }
+        
+        @Key
+        private String text;
+        
+        public String getText() {
+            return text;
+        }
+        
+        @Key
+        private Entities entities;
+        
+        public Entities getEntities() {
+            return entities;
+        }
+    }
+    
+    public static class Entities {
+        @Key
+        private List<Hashtags> hashtags;
+        
+        @Key
+        private List<Symbols> symbols;
+        
+        @Key
+        private List<UserMentions> userMentions;
+        
+        @Key
+        private List<Urls> urls;
+        
+        @Key
+        private List<Media> media;
+        
+    }
     
     private String requestBearerToken() {
         String ret = null;
