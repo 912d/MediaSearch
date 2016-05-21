@@ -22,13 +22,7 @@ import org.json.simple.JSONValue;
  *
  * @author jackmusial
  */
-public final class TwitterService {
-    private final String CONSUMER_KEY = "EgzK0RfsxfSiOIuaocz1dWl2i";
-    private final String CONSUMER_SECRET = "mv2MSuA2AsQXzLoyyJCSm2e1WUlKcgw5VIHkkhI6xTrbxV2t7t";
-    private final String ACCESS_TOKEN = "725253533071712256-l1F54xJlqmtlCfzZ9gN7Mgd09C5YFgg";
-    private final String ACCESS_TOKEN_SECRET = "Kw7qX4XmXtXdtujBmWD8wA54myr9d8vBPUihRxBDn3bWX";
-    private final String OAUTH_TOKEN_URL = "https://api.twitter.com/oauth2/token";
-    private final String RATE_LIMIT_STATUS_URL = "https://api.twitter.com/1.1/application/rate_limit_status.json?resources=search";
+public class TwitterService {
     private final String bearerToken;
     
     public TwitterService() {
@@ -37,8 +31,8 @@ public final class TwitterService {
 
     private String encodeKeys() {
 	try {
-            String encodedConsumerKey = URLEncoder.encode(CONSUMER_KEY, "UTF-8");
-            String encodedConsumerSecret = URLEncoder.encode(CONSUMER_SECRET, "UTF-8");
+            String encodedConsumerKey = URLEncoder.encode(TwitterData.CONSUMER_KEY, "UTF-8");
+            String encodedConsumerSecret = URLEncoder.encode(TwitterData.CONSUMER_SECRET, "UTF-8");
             String fullKey = encodedConsumerKey + ":" + encodedConsumerSecret;
             byte[] encodedBytes = Base64.encodeBase64(fullKey.getBytes());
             return new String(encodedBytes);  
@@ -49,7 +43,7 @@ public final class TwitterService {
     }
     
     public int getRateLimitStatus() {
-        HttpsURLConnection connection = bearerAuthConnectionGet(RATE_LIMIT_STATUS_URL);
+        HttpsURLConnection connection = bearerAuthConnectionGet(TwitterData.RATE_LIMIT_STATUS_URL);
         int ret = 0;
         JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
         if (obj != null) {
@@ -63,7 +57,7 @@ public final class TwitterService {
     
     private String requestBearerToken() {
         String ret = null;
-        HttpsURLConnection connection = basicAuthConnectionPost(OAUTH_TOKEN_URL);
+        HttpsURLConnection connection = basicAuthConnectionPost(TwitterData.OAUTH_TOKEN_URL);
         JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
         if (obj != null) {
             String tokenType = (String)obj.get("token_type");
