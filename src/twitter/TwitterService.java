@@ -13,8 +13,10 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.codec.binary.Base64;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -24,35 +26,9 @@ import org.json.simple.JSONValue;
  */
 public class TwitterService {
     private final String bearerToken;
-    
+
     public TwitterService() {
         bearerToken = requestBearerToken(); 
-    }
-
-    private String encodeKeys() {
-	try {
-            String encodedConsumerKey = URLEncoder.encode(TwitterData.CONSUMER_KEY, "UTF-8");
-            String encodedConsumerSecret = URLEncoder.encode(TwitterData.CONSUMER_SECRET, "UTF-8");
-            String fullKey = encodedConsumerKey + ":" + encodedConsumerSecret;
-            byte[] encodedBytes = Base64.encodeBase64(fullKey.getBytes());
-            return new String(encodedBytes);  
-	}
-	catch (UnsupportedEncodingException e) {
-            return new String();
-	}
-    }
-    
-    public int getRateLimitStatus() {
-        HttpsURLConnection connection = bearerAuthConnectionGet(TwitterData.RATE_LIMIT_STATUS_URL);
-        int ret = 0;
-        JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
-        if (obj != null) {
-            JSONObject o = (JSONObject) obj.get("resources");
-            o = (JSONObject) o.get("search");
-            o = (JSONObject) o.get("/search/tweets");
-            ret = (int) o.get("remaining");
-        }
-        return ret;
     }
     
     private String requestBearerToken() {
@@ -69,6 +45,45 @@ public class TwitterService {
         }
         return ret;
     }
+    
+    public ArrayList<TwitterTweet> search(String query) {
+        try {
+            return searchForTweetsAndParseJson(query);
+        } catch (UnsupportedEncodingException ex) {
+            System.err.println(ex.getMessage());
+        }
+        return null;
+    }
+    
+    private ArrayList<TwitterTweet> searchForTweetsAndParseJson(String query) throws UnsupportedEncodingException {
+        final String q = TwitterData.SEARCH_URL + URLEncoder.encode(query, "UTF-8");
+        HttpsURLConnection connection = bearerAuthConnectionGet(q);
+        if (connection != null) {
+            connection.disconnect();
+        }
+        
+        String readResponse = readResponse(connection);
+        JSONObject obj = (JSONObject) JSONValue.parse(readResponse);
+
+        return parseJsonIntoTweets(obj);
+    }
+    
+    private ArrayList<TwitterTweet> parseJsonIntoTweets(JSONObject obj) {
+        ArrayList<TwitterTweet> ret = null;
+
+        JSONArray array = (JSONArray) obj.get("statuses");
+        array.stream().forEach((Object _item) -> {
+            JSONObject object = (JSONObject) _item;
+            ArrayList<String> data = new ArrayList<>();
+            data.add((String) object.get("created_at"));
+            data.add((String) object.get("text"));
+            if (object.containsKey("urls")) {
+                JSONObject o = (JSONObject) object.get("entities");
+            }
+        });
+        
+        return ret;
+   }
     
     public HttpsURLConnection bearerAuthConnectionGet(String url) {
         HttpsURLConnection connection = null;
@@ -131,5 +146,31 @@ public class TwitterService {
 	catch (IOException e) { return new String(); }
     }
 
+    public int getRateLimitStatus() {
+        HttpsURLConnection connection = bearerAuthConnectionGet(TwitterData.RATE_LIMIT_STATUS_URL);
+        int ret = 0;
+        JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
+        if (obj != null) {
+            JSONObject o = (JSONObject) obj.get("resources");
+            o = (JSONObject) o.get("search");
+            o = (JSONObject) o.get("/search/tweets");
+            ret = (int) o.get("remaining");
+        }
+        return ret;
+    }    
+    
+    private String encodeKeys() {
+	try {
+            String encodedConsumerKey = URLEncoder.encode(TwitterData.CONSUMER_KEY, "UTF-8");
+            String encodedConsumerSecret = URLEncoder.encode(TwitterData.CONSUMER_SECRET, "UTF-8");
+            String fullKey = encodedConsumerKey + ":" + encodedConsumerSecret;
+            byte[] encodedBytes = Base64.encodeBase64(fullKey.getBytes());
+            return new String(encodedBytes);  
+	}
+	catch (UnsupportedEncodingException e) {
+            return new String();
+	}
+    }
+    
     public String getBearerToken() { return bearerToken;}
 }
