@@ -72,11 +72,14 @@ public class TwitterService {
     
     private ArrayList<TwitterTweet> parseJsonIntoTweets(JSONObject obj) {
         ArrayList<TwitterTweet> ret = null;
-        Gson gson = new GsonBuilder().create();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.serializeNulls();
+        Gson gson = gsonBuilder.create();
+        
         JSONArray array = (JSONArray) obj.get("statuses");
         array.stream().forEach((Object _item) -> {
-            TwitterTweet tweet = gson.fromJson(_item.toString(), TwitterTweet.class);
-            System.out.println(tweet.getScreen_name() + ":" + tweet.getText());
+        TwitterTweet tweet = gson.fromJson(_item.toString(), TwitterTweet.class);
+        System.out.println(tweet.toString());    
             /*System.out.println(tweet.to);
             ret.add(tweet);*/
             /*
