@@ -5,6 +5,8 @@
  */
 package twitter;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -70,16 +72,25 @@ public class TwitterService {
     
     private ArrayList<TwitterTweet> parseJsonIntoTweets(JSONObject obj) {
         ArrayList<TwitterTweet> ret = null;
-
+        Gson gson = new GsonBuilder().create();
         JSONArray array = (JSONArray) obj.get("statuses");
         array.stream().forEach((Object _item) -> {
-            JSONObject object = (JSONObject) _item;
-            ArrayList<String> data = new ArrayList<>();
-            data.add((String) object.get("created_at"));
-            data.add((String) object.get("text"));
-            if (object.containsKey("urls")) {
-                JSONObject o = (JSONObject) object.get("entities");
+            TwitterTweet tweet = gson.fromJson(_item.toString(), TwitterTweet.class);
+            System.out.println(tweet.getScreen_name() + ":" + tweet.getText());
+            /*System.out.println(tweet.to);
+            ret.add(tweet);*/
+            /*
+            (String) object.get("created_at");
+            tweet.setText((String) object.get("text"));
+            JSONObject o = (JSONObject) object.get("entities");
+            if (o.containsKey("hashtags")) {
+                JSONArray arrayUrls = (JSONArray) o.get("hashtags");
+                arrayUrls.stream().forEach((Object _item1) -> {
+                    
+                });
             }
+            if (object.containsKey("urls")) {
+            }*/
         });
         
         return ret;
