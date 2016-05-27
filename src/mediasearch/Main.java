@@ -17,9 +17,8 @@ public class Main {
     
     public static void main(String[] args) throws UnsupportedEncodingException {
         TwitterSearch search = new TwitterSearch("#NASA", TwitterSearch.SEARCHTYPE.TEXT);
-        String search1 = search.search();
-        System.out.println(search1);
-        search.getRateLimitStatus();
+        search.search();
+        System.out.println(search.getRateLimitStatus());
         //RunInterval interval = new RunInterval(1, search);
         //interval.start();
         

@@ -35,20 +35,20 @@ public class TwitterService {
         ret = new ArrayList<>();
     }
     
-    private String requestBearerToken() {
-        String ret = null;
+    private String requestBearerToken() {        
         HttpsURLConnection connection = basicAuthConnectionPost(TwitterData.OAUTH_TOKEN_URL);
+        
         JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
         if (obj != null) {
             String tokenType = (String)obj.get("token_type");
             String token = (String)obj.get("access_token");
-            ret = ((tokenType.equals("bearer")) && (token != null)) ? token : "";
+            return ((tokenType.equals("bearer")) && (token != null)) ? token : "";
         }
         
         if (connection != null) {
             connection.disconnect();
         }
-        return ret;
+        return null;
     }
     
     public ArrayList<TwitterTweet> search(String query) {
@@ -57,6 +57,7 @@ public class TwitterService {
         } catch (UnsupportedEncodingException ex) {
             System.err.println(ex.getMessage());
         }
+        
         return null;
     }
     
@@ -69,7 +70,6 @@ public class TwitterService {
         
         String readResponse = readResponse(connection);
         JSONObject obj = (JSONObject) JSONValue.parse(readResponse);
-
         return parseJsonIntoTweets(obj);
     }
     
@@ -149,17 +149,18 @@ public class TwitterService {
 	catch (IOException e) { return new String(); }
     }
 
-    public int getRateLimitStatus() {
+    public long getRateLimitStatus() {
         HttpsURLConnection connection = bearerAuthConnectionGet(TwitterData.RATE_LIMIT_STATUS_URL);
-        int ret = 0;
+        
         JSONObject obj = (JSONObject) JSONValue.parse(readResponse(connection));
         if (obj != null) {
             JSONObject o = (JSONObject) obj.get("resources");
             o = (JSONObject) o.get("search");
             o = (JSONObject) o.get("/search/tweets");
-            ret = (int) o.get("remaining");
+            return (long) o.get("remaining");
         }
-        return ret;
+        
+        return 0xdeadbeef;
     }    
     
     private String encodeKeys() {
