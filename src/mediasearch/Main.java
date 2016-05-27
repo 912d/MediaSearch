@@ -7,7 +7,7 @@
 package mediasearch;
 
 import java.io.UnsupportedEncodingException;
-import twitter.TwitterSearch;
+import mediasearch.twitter.TwitterSearch;
 
 /**
  *

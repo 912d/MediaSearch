@@ -8,7 +8,7 @@ package mediasearch;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import twitter.TwitterSearch;
+import mediasearch.twitter.TwitterSearch;
 
 /**
  *

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package twitter;
+package mediasearch.twitter;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
