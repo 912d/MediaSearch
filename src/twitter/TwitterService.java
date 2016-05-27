@@ -28,9 +28,11 @@ import org.json.simple.JSONValue;
  */
 public class TwitterService {
     private final String bearerToken;
-
+    private final ArrayList<TwitterTweet> ret; 
+    
     public TwitterService() {
         bearerToken = requestBearerToken(); 
+        ret = new ArrayList<>();
     }
     
     private String requestBearerToken() {
@@ -42,6 +44,7 @@ public class TwitterService {
             String token = (String)obj.get("access_token");
             ret = ((tokenType.equals("bearer")) && (token != null)) ? token : "";
         }
+        
         if (connection != null) {
             connection.disconnect();
         }
@@ -71,29 +74,15 @@ public class TwitterService {
     }
     
     private ArrayList<TwitterTweet> parseJsonIntoTweets(JSONObject obj) {
-        ArrayList<TwitterTweet> ret = null;
         GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(String.class, new NullJsonStringConverter());
         gsonBuilder.serializeNulls();
         Gson gson = gsonBuilder.create();
         
         JSONArray array = (JSONArray) obj.get("statuses");
         array.stream().forEach((Object _item) -> {
-        TwitterTweet tweet = gson.fromJson(_item.toString(), TwitterTweet.class);
-        System.out.println(tweet.toString());    
-            /*System.out.println(tweet.to);
-            ret.add(tweet);*/
-            /*
-            (String) object.get("created_at");
-            tweet.setText((String) object.get("text"));
-            JSONObject o = (JSONObject) object.get("entities");
-            if (o.containsKey("hashtags")) {
-                JSONArray arrayUrls = (JSONArray) o.get("hashtags");
-                arrayUrls.stream().forEach((Object _item1) -> {
-                    
-                });
-            }
-            if (object.containsKey("urls")) {
-            }*/
+            TwitterTweet tweet = gson.fromJson(_item.toString(), TwitterTweet.class);
+            ret.add(tweet); 
         });
         
         return ret;
