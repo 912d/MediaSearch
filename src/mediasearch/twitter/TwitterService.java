@@ -73,18 +73,19 @@ public class TwitterService {
         return parseJsonIntoTweets(obj);
     }
     
-    private ArrayList<TwitterTweet> parseJsonIntoTweets(JSONObject obj) {
+    private ArrayList<TwitterTweet> parseJsonIntoTweets(JSONObject object) {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(String.class, new NullJsonStringConverter());
         gsonBuilder.serializeNulls();
         Gson gson = gsonBuilder.create();
         
-        JSONArray array = (JSONArray) obj.get("statuses");
-        array.stream().forEach((Object _item) -> {
-            TwitterTweet tweet = gson.fromJson(_item.toString(), TwitterTweet.class);
+        JSONArray array = (JSONArray) object.get("statuses");
+        for(int i = 0; i < array.size(); i++) {
+            JSONObject jSONObject = (JSONObject) array.get(i);
+            TwitterTweet tweet = gson.fromJson(jSONObject.toString(), TwitterTweet.class);
             ret.add(tweet); 
-        });
-        
+        }
+
         return ret;
    }
     
