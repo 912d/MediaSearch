@@ -6,9 +6,6 @@
 
 package mediasearch.twitter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author jackmusial
@@ -16,23 +13,10 @@ import java.util.List;
 public class TwitterTweet {
     public String created_at;
     public String text;
-    public entities entities;
+    //public entities entities;
     public user user;
     
-    public class entities {
-        public List<hashtags> hashtags = new ArrayList<>();
-        public List<urls> urls = new ArrayList<>();
-                
-        class hashtags {
-           public String text;
-        }
-        
-        class urls {
-            public String url;
-        }
-    }
-    
-    public class user {
+    public static class user {
         public String name;
         public String location;
         public String description;
@@ -42,7 +26,7 @@ public class TwitterTweet {
     @Override
     public String toString() {
         return "[created_at:" + created_at + ",\ntext:" + text + "\nhashtags:" 
-                + entities.hashtags + ",\nurls:" + entities.urls + ",\n" + 
+                +// Arrays.toString(entities.hashtag.toArray()) + ",\nurls:" + Arrays.toString(entities.url.toArray()) + ",\n" + 
                 "name:" + user.name + ",\nlocation:" + user.location + ",\n" +
                 "description:" + user.description + ",\nprofileUrl:" + user.profile_image_url_https
                 + "]";
